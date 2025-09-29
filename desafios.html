@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provas em iFrames</title>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background: #0f2027;
+        overflow-x: hidden;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .iframe-container {
+        width: 100%;
+        height: 100vh; /* ocupa toda a altura da tela */
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .loading {
+        color: #ffcc00;
+        text-align: center;
+        margin: 20px 0;
+    }
+</style>
+</head>
+<body>
+
+<div id="loadingMessage" class="loading">Carregando links...</div>
+<div id="iframesContainer"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYb8LQA_J_vHS8rmpRzk53rwWSU3u3-aM",
+        authDomain: "ecoprof-a6dc5.firebaseapp.com",
+        projectId: "ecoprof-a6dc5",
+        storageBucket: "ecoprof-a6dc5.firebasestorage.app",
+        messagingSenderId: "469767413045",
+        appId: "1:469767413045:web:d4a371da964b07d59f407c",
+        measurementId: "G-NNC7YEW3MZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const container = document.getElementById('iframesContainer');
+    const loadingMessage = document.getElementById('loadingMessage');
+
+    async function loadLinks() {
+        try {
+            const linksRef = collection(db, "links");
+            const q = query(linksRef, orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                loadingMessage.textContent = "Nenhum link encontrado.";
+                return;
+            }
+
+            loadingMessage.style.display = 'none';
+
+            querySnapshot.forEach(doc => {
+                const link = doc.data().url;
+                const validUrl = link.startsWith('http') ? link : 'https://' + link;
+
+                const iframeWrapper = document.createElement('div');
+                iframeWrapper.className = 'iframe-container';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = validUrl;
+
+                iframeWrapper.appendChild(iframe);
+                container.appendChild(iframeWrapper);
+            });
+        } catch (error) {
+            console.error(error);
+            loadingMessage.textContent = "Erro ao carregar links.";
+        }
+    }
+
+    loadLinks();
+</script>
+
+</body>
+</html>

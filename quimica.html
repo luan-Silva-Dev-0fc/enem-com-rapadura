@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Em Breve - ENEM com Rapadura</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Modal */
+  #modal {
+    position: relative;
+    z-index: 10;
+    background: rgba(0,0,0,0.8);
+    padding: 40px;
+    border-radius: 24px;
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+    animation: fadeIn 1s ease;
+  }
+
+  #modal h1 {
+    font-size: 2em;
+    background: linear-gradient(90deg, #ff512f, #dd2476);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+  }
+
+  #modal p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+  }
+
+  #modal button {
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 1em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(145deg, #ff512f, #dd2476);
+    transition: 0.3s;
+  }
+
+  #modal button:hover {
+    background: linear-gradient(145deg, #f7971e, #ffd200);
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0; transform: scale(0.8);}
+    to {opacity: 1; transform: scale(1);}
+  }
+
+  /* Canvas do jogo/efeito */
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div id="modal">
+  <h1>Logo logo teremos mais recursos!</h1>
+  <p>Enquanto isso, divirta-se com nosso mini efeito animado!</p>
+  <button onclick="document.getElementById('modal').style.display='none'">Fechar</button>
+</div>
+
+<script>
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const hearts = [];
+
+function random(min,max){ return Math.random()*(max-min)+min; }
+
+class Heart {
+  constructor(x,y){
+    this.x = x; this.y = y;
+    this.size = random(10,25);
+    this.speedY = random(0.5,2);
+    this.alpha = 1;
+    this.color = `hsl(${random(0,360)},80%,70%)`;
+  }
+  update() {
+    this.y -= this.speedY;
+    this.alpha -= 0.008;
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    const t = this.size*0.3;
+    ctx.moveTo(this.x, this.y);
+    ctx.bezierCurveTo(this.x, this.y-t, this.x-this.size/2, this.y-t, this.x-this.size/2, this.y+this.size/4);
+    ctx.bezierCurveTo(this.x-this.size/2, this.y+this.size/2, this.x, this.y+this.size/1.5, this.x, this.y+this.size);
+    ctx.bezierCurveTo(this.x, this.y+this.size/1.5, this.x+this.size/2, this.y+this.size/2, this.x+this.size/2, this.y+this.size/4);
+    ctx.bezierCurveTo(this.x+this.size/2, this.y-t, this.x, this.y-t, this.x, this.y);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function animate() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=hearts.length-1;i>=0;i--){
+    hearts[i].update();
+    hearts[i].draw();
+    if(hearts[i].alpha<=0) hearts.splice(i,1);
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+
+// criar coração no mouse
+window.addEventListener('mousemove', e=>{
+  hearts.push(new Heart(e.clientX, e.clientY));
+  if(hearts.length>250) hearts.splice(0,15);
+});
+
+// criar coração no teclado
+window.addEventListener('keydown', e=>{
+  for(let i=0;i<5;i++){
+    hearts.push(new Heart(random(0,canvas.width), random(0,canvas.height)));
+    if(hearts.length>250) hearts.splice(0,5);
+  }
+});
+
+// redimensionar canvas
+window.addEventListener('resize', ()=>{
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enviar Link - Visualizador de Sites</title>
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: #fff;
+        padding: 20px;
+    }
+
+    h1 {
+        margin-bottom: 30px;
+        background: linear-gradient(90deg, #ff512f, #dd2476);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5em;
+        text-align: center;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    input[type="text"] {
+        padding: 15px;
+        border-radius: 10px;
+        border: none;
+        font-size: 1em;
+    }
+
+    button {
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1em;
+        font-weight: bold;
+        background: linear-gradient(145deg, #ff512f, #dd2476);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .success {
+        color: #00ff99;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .error {
+        color: #ff5555;
+        text-align: center;
+        margin-top: 15px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Enviar Link do Site</h1>
+
+<form id="linkForm">
+    <input type="text" id="siteUrl" placeholder="Digite o link do site (ex: www.google.com)" required>
+    <button type="submit">Enviar Link</button>
+</form>
+
+<div id="message"></div>
+
+<script type="module">
+  // Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCYb8LQA_J_vHS8rmpRzk53rwWSU3u3-aM",
+    authDomain: "ecoprof-a6dc5.firebaseapp.com",
+    projectId: "ecoprof-a6dc5",
+    storageBucket: "ecoprof-a6dc5.firebasestorage.app",
+    messagingSenderId: "469767413045",
+    appId: "1:469767413045:web:d4a371da964b07d59f407c",
+    measurementId: "G-NNC7YEW3MZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const form = document.getElementById('linkForm');
+  const messageDiv = document.getElementById('message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const urlInput = document.getElementById('siteUrl').value.trim();
+    if(!urlInput) return;
+
+    try {
+      await addDoc(collection(db, "links"), {
+        url: urlInput,
+        createdAt: serverTimestamp()
+      });
+      messageDiv.innerHTML = "<p class='success'>Link enviado com sucesso!</p>";
+      form.reset();
+    } catch (error) {
+      messageDiv.innerHTML = "<p class='error'>Erro ao enviar link. Tente novamente.</p>";
+      console.error(error);
+    }
+  });
+</script>
+
+</body>
+</html>
